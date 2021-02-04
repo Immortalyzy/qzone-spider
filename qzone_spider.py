@@ -101,6 +101,7 @@ class QzoneSpider(object):
         # 解决 unknown error: DevToolsActivePort file doesn't exist
         self.options.add_argument('--no-sandbox')  # 绕过操作系统沙箱环境
         self.options.add_argument('--disable-dev-shm-usage')  # 解决资源限制，仅适用于 Linux 系统
+        self.options.add_argument('--disable-blink-features=AutomationControlled')  # Chrome v88 以上版本正确隐藏浏览器特征
 
         self.driver = webdriver.Chrome(executable_path=os.getenv('EXECUTABLE_PATH'), options=self.options)
         self.driver.implicitly_wait(QzoneSpider.timeout)
@@ -529,13 +530,13 @@ class QzoneSpider(object):
         sleep_time and time.sleep(sleep_time)
 
     @staticmethod
-    def now():
+    def now(format='%Y-%m-%d %H:%M:%S.%f'):
         """
         当前时间
         精确到毫秒
         :return:
         """
-        return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        return datetime.datetime.now().strftime(format)[:-3]
 
     @catch_exception
     def run(self):
@@ -546,7 +547,7 @@ class QzoneSpider(object):
         comment_cut_word = self.cut_word(all_comment)
 
         if comment_cut_word:
-            word_cloud_comment_img = 'result/word_cloud_{}_{}.png'.format(self.friend_qq, self.comment_total)
+            word_cloud_comment_img = f'result/word_cloud_{self.friend_qq}_{self.comment_total}_{self.now("%Y-%m-%d_%H_%M_%S_%f")}.png'
             self.gen_word_cloud_image(comment_cut_word, word_cloud_comment_img)
             QzoneSpider.format_print('已生成词云图：{} 共 {} 条留言'.format(word_cloud_comment_img, self.comment_total))
 
